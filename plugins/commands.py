@@ -51,9 +51,13 @@ async def start(client, message):
         if message.command[1] != "subscribe":
             btn.append(
                 [
-                    InlineKeyboardButton("🍿 ᴊᴏɪɴ ᴏᴜʀ ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ 🍿", url="https://t.me/LatestmoviedriveCL1")
-                ],[
-                    InlineKeyboardButton("🌀ʜᴇʟʟᴏ.. ɪ ᴀᴍ ᴊᴏɪɴᴇᴅ ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ🌀", callback_data=f"checksub#{file_id}")
+                    [
+                        InlineKeyboardButton("🍿 ᴊᴏɪɴ ᴏᴜʀ ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ 🍿", url="https://t.me/LatestmoviedriveCL1")
+                    ],
+                    [
+                        InlineKeyboardButton("🌀ʜᴇʟʟᴏ.. ɪ ᴀᴍ ᴊᴏɪɴᴇᴅ ʏᴏᴜʀ ᴄʜᴀɴɴᴇʟ🌀", callback_data=f"checksub#{file_id}")
+                    ]
+                ]
             )
         await client.send_message(
             chat_id=message.from_user.id,
