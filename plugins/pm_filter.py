@@ -7,11 +7,11 @@ from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidD
 from Script import script
 import pyrogram
 from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, make_inactive
-from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, NOR_IMG, SINGLE_BUTTON, IMDB_TEMPLATE, P_TTI_SHOW_OFF, IMDB, SPELL_CHECK_REPLY
+from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE, NOR_IMG
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
-from utils import get_size, is_subscribed, get_poster, temp
+from utils import get_size, is_subscribed, get_poster, search_gagala, temp
 from database.users_chats_db import db
 from database.ia_filterdb import Media, get_file_details, get_search_results
 from database.filters_mdb import(
@@ -19,25 +19,21 @@ from database.filters_mdb import(
    find_filter,
    get_filters,
 )
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.ERROR)
 
 BUTTONS = {}
+SPELL_CHECK = {}
 
-STARTING_MSG = """
-മോനെ {} ഇത് നിനക്കുള്ളതല്ല 😉
-{}ന്റെ റിക്യൂസ്റ്റ് ആണ് ഇത് 😜
-ʀᴇǫᴜᴇᴇsᴛ ʏᴏᴜʀ ᴏᴡɴ
 
-©️ ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰
-"""
-  
-   
 
 @Client.on_message(filters.group & filters.text & ~filters.edited & filters.incoming)
 async def give_filter(client,message):
     k = await manual_filters(client, message)
     if k == False:
-        await auto_filter(client, message) 
-     
+        await auto_filter(client, message)   
+
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
 
@@ -112,6 +108,29 @@ async def next_page(bot, query):
         pass
     await query.answer()
 
+@Client.on_callback_query(filters.regex(r"^spolling"))
+async def advantage_spoll_choker(bot, query):
+    _, user, movie_ = query.data.split('#')
+    if int(user) != 0 and query.from_user.id != int(user):
+        return await query.answer("okDa", show_alert=True)
+    if movie_  == "close_spellcheck":
+        return await query.message.delete()
+    movies = SPELL_CHECK.get(query.message.reply_to_message.message_id)
+    if not movies:
+        return await query.answer("You are clicking on an old button which is expired.", show_alert=True)
+    movie = movies[(int(movie_))]
+    await query.answer('Checking for Movie in database...')
+    k = await manual_filters(bot, query.message, text=movie)
+    if k==False:
+        files, offset, total_results = await get_search_results(movie, offset=0, filter=True)
+        if files:
+            k = (movie, files, offset, total_results)
+            await auto_filter(bot, query, k)
+        else:
+            k = await query.message.edit('This Movie Not Found In DataBase')
+            await asyncio.sleep(10)
+            await k.delete()
+
 
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
@@ -176,8 +195,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.answer()
 
         group_id = query.data.split(":")[1]
-        title = query.data.split(":")[2]
-        act = query.data.split(":")[3]
+        
+        act = query.data.split(":")[2]
+        hr = await client.get_chat(int(group_id))
+        title = hr.title
         user_id = query.from_user.id
 
         if act == "":
@@ -188,7 +209,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
             cb = "disconnect"
 
         keyboard = InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"{stat}", callback_data=f"{cb}:{group_id}:{title}"),
+            [InlineKeyboardButton(f"{stat}", callback_data=f"{cb}:{group_id}"),
                 InlineKeyboardButton("DELETE", callback_data=f"deletecb:{group_id}")],
             [InlineKeyboardButton("BACK", callback_data="backcb")]
         ])
@@ -204,7 +225,11 @@ async def cb_handler(client: Client, query: CallbackQuery):
         await query.answer()
 
         group_id = query.data.split(":")[1]
-        title = query.data.split(":")[2]
+
+        hr = await client.get_chat(int(group_id))
+
+        title = hr.title
+
         user_id = query.from_user.id
 
         mkact = await make_active(str(user_id), str(group_id))
@@ -217,10 +242,15 @@ async def cb_handler(client: Client, query: CallbackQuery):
         else:
             await query.message.edit_text('Some error occured!!', parse_mode="md")
         return
+
     elif "disconnect" in query.data:
         await query.answer()
 
-        title = query.data.split(":")[2]
+        group_id = query.data.split(":")[1]
+
+        hr = await client.get_chat(int(group_id))
+
+        title = hr.title
         user_id = query.from_user.id
 
         mkinact = await make_inactive(str(user_id))
@@ -231,7 +261,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 parse_mode="md"
             )
         else:
-            await query.message.edit_text('Some error occured!!', parse_mode="md")
+            await query.message.edit_text(
+                f"Some error occured!!",
+                parse_mode="md"
+            )
         return
     elif "deletecb" in query.data:
         await query.answer()
@@ -246,7 +279,10 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 "Successfully deleted connection"
             )
         else:
-            await query.message.edit_text('Some error occured!!', parse_mode="md")
+            await query.message.edit_text(
+                f"Some error occured!!",
+                parse_mode="md"
+            )
         return
     elif query.data == "backcb":
         await query.answer()
@@ -269,7 +305,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
                 buttons.append(
                     [
                         InlineKeyboardButton(
-                            text=f"{title}{act}", callback_data=f"groupcb:{groupid}:{title}:{act}"
+                            text=f"{title}{act}", callback_data=f"groupcb:{groupid}:{act}"
                         )
                     ]
                 )
@@ -294,38 +330,34 @@ async def cb_handler(client: Client, query: CallbackQuery):
 
     if query.data.startswith("file"):
         ident, file_id = query.data.split("#")
-        files = (await get_file_details(file_id))[0]
+        files_ = await get_file_details(file_id)
+        if not files_:
+            return await query.answer('No such file exist.')
+        files = files_[0]
         title = files.file_name
         size=get_size(files.file_size)
         f_caption=files.caption
         if CUSTOM_FILE_CAPTION:
             try:
-                f_caption=CUSTOM_FILE_CAPTION.format(file_name=title, file_size=size, file_caption=f_caption)
+                f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
             except Exception as e:
-                print(e)
+                logger.exception(e)
             f_caption=f_caption
         if f_caption is None:
             f_caption = f"{files.file_name}"
-            buttons = [
-               [
-                  InlineKeyboardButton("🍁 ᴊᴏɪɴ ɢʀᴏᴜᴘ 🍁", url="https://t.me/Cinemalokham1"),
-                  InlineKeyboardButton("💥 ꜱʜᴀʀᴇ 💥", url="https://t.me/share/url?url=**%F0%9F%A4%A9%20%E0%B4%B8%E0%B4%BF%E0%B4%A8%E0%B4%BF%E0%B4%AE%20%E0%B4%B2%E0%B5%8B%E0%B4%95%E0%B4%82%20%F0%9F%A4%A9%0A%0A%E0%B4%8F%E0%B4%A4%E0%B5%8D%20%E0%B4%85%E0%B5%BC%E0%B4%A7%E0%B4%B0%E0%B4%BE%E0%B4%A4%E0%B5%8D%E0%B4%B0%E0%B4%BF%20%E0%B4%9A%E0%B5%8B%E0%B4%A6%E0%B4%BF%E0%B4%9A%E0%B5%8D%E0%B4%9A%E0%B4%BE%E0%B4%B2%E0%B5%81%E0%B4%82%20%E0%B4%AA%E0%B4%9F%E0%B4%82%20%E0%B4%95%E0%B4%BF%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B5%81%E0%B4%82,%20%E0%B4%B2%E0%B5%8B%E0%B4%95%E0%B4%A4%E0%B5%8D%E0%B4%A4%E0%B4%BF%E0%B4%B2%E0%B5%86%20%E0%B4%92%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B5%81%E0%B4%AE%E0%B4%BF%E0%B4%95%E0%B5%8D%E0%B4%95%20%E0%B4%AD%E0%B4%BE%E0%B4%B7%E0%B4%95%E0%B4%B3%E0%B4%BF%E0%B4%B2%E0%B5%81%E0%B4%AE%E0%B5%81%E0%B4%B3%E0%B5%8D%E0%B4%B3%20%E0%B4%B8%E0%B4%BF%E0%B4%A8%E0%B4%BF%E0%B4%AE%E0%B4%95%E0%B4%B3%E0%B5%81%E0%B4%9F%E0%B5%86%20%E0%B4%95%E0%B4%B3%E0%B4%95%E0%B5%8D%E0%B4%B7%E0%B5%BB..%20%E2%9D%A4%EF%B8%8F%0A%0A%F0%9F%91%87%20GROUP%20LINK%20%F0%9F%91%87%0A@Cinemalokham1%0A@Cinemalokham1%0A@Cinemalokham1**")
-               ],
-               [
-                  InlineKeyboardButton("🔖 ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜʙᴛɪᴛɪʟᴇ 🔖", url="https://t.me/subtitle_dl_bot")
-               ]
-            ]
             
         try:
             if AUTH_CHANNEL and not await is_subscribed(client, query):
+                await query.answer(url=f"https://t.me/{temp.U_NAME}?start={file_id}")
+                return
+            elif P_TTI_SHOW_OFF:
                 await query.answer(url=f"https://t.me/{temp.U_NAME}?start={file_id}")
                 return
             else:
                 await client.send_cached_media(
                     chat_id=query.from_user.id,
                     file_id=file_id,
-                    caption=f_caption,
-                    reply_markup=InlineKeyboardMarkup(buttons)
+                    caption=f_caption
                     )
                 await query.answer('Check PM, I have sent files in pm',show_alert = True)
         except UserIsBlocked:
@@ -340,53 +372,49 @@ async def cb_handler(client: Client, query: CallbackQuery):
             await query.answer("I Like Your Smartness, But Don't Be Oversmart 😒",show_alert=True)
             return
         ident, file_id = query.data.split("#")
-        files = (await get_file_details(file_id))[0]
+        files_ = await get_file_details(file_id)
+        if not files_:
+            return await query.answer('No such file exist.')
+        files = files_[0]
         title = files.file_name
         size=get_size(files.file_size)
         f_caption=files.caption
         if CUSTOM_FILE_CAPTION:
             try:
-                f_caption=CUSTOM_FILE_CAPTION.format(file_name=title, file_size=size, file_caption=f_caption)
+                f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
             except Exception as e:
-                print(e)
+                logger.exception(e)
                 f_caption=f_caption
         if f_caption is None:
             f_caption = f"{title}"
-            buttons = [
-               [
-                  InlineKeyboardButton("🍁 ᴊᴏɪɴ ɢʀᴏᴜᴘ 🍁", url="https://t.me/Cinemalokham1"),
-                  InlineKeyboardButton("💥 ꜱʜᴀʀᴇ 💥", url="https://t.me/share/url?url=**%F0%9F%A4%A9%20%E0%B4%B8%E0%B4%BF%E0%B4%A8%E0%B4%BF%E0%B4%AE%20%E0%B4%B2%E0%B5%8B%E0%B4%95%E0%B4%82%20%F0%9F%A4%A9%0A%0A%E0%B4%8F%E0%B4%A4%E0%B5%8D%20%E0%B4%85%E0%B5%BC%E0%B4%A7%E0%B4%B0%E0%B4%BE%E0%B4%A4%E0%B5%8D%E0%B4%B0%E0%B4%BF%20%E0%B4%9A%E0%B5%8B%E0%B4%A6%E0%B4%BF%E0%B4%9A%E0%B5%8D%E0%B4%9A%E0%B4%BE%E0%B4%B2%E0%B5%81%E0%B4%82%20%E0%B4%AA%E0%B4%9F%E0%B4%82%20%E0%B4%95%E0%B4%BF%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B5%81%E0%B4%82,%20%E0%B4%B2%E0%B5%8B%E0%B4%95%E0%B4%A4%E0%B5%8D%E0%B4%A4%E0%B4%BF%E0%B4%B2%E0%B5%86%20%E0%B4%92%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B5%81%E0%B4%AE%E0%B4%BF%E0%B4%95%E0%B5%8D%E0%B4%95%20%E0%B4%AD%E0%B4%BE%E0%B4%B7%E0%B4%95%E0%B4%B3%E0%B4%BF%E0%B4%B2%E0%B5%81%E0%B4%AE%E0%B5%81%E0%B4%B3%E0%B5%8D%E0%B4%B3%20%E0%B4%B8%E0%B4%BF%E0%B4%A8%E0%B4%BF%E0%B4%AE%E0%B4%95%E0%B4%B3%E0%B5%81%E0%B4%9F%E0%B5%86%20%E0%B4%95%E0%B4%B3%E0%B4%95%E0%B5%8D%E0%B4%B7%E0%B5%BB..%20%E2%9D%A4%EF%B8%8F%0A%0A%F0%9F%91%87%20GROUP%20LINK%20%F0%9F%91%87%0A@Cinemalokham1%0A@Cinemalokham1%0A@Cinemalokham1**")
-               ],
-               [
-                  InlineKeyboardButton("🔖 ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜʙᴛɪᴛɪʟᴇ 🔖", url="https://t.me/subtitle_dl_bot")
-               ]
-            ]
         await query.answer()
         await client.send_cached_media(
             chat_id=query.from_user.id,
             file_id=file_id,
-            caption=f_caption,
-            reply_markup=InlineKeyboardMarkup(buttons)
+            caption=f_caption
             )
 
     elif query.data == "pages":
         await query.answer()
     elif query.data == "start":
         buttons = [[
-            InlineKeyboardButton('🤴ʙᴏᴛ ᴏᴡɴᴇʀ🤴', url=f'https://t.me/im_odiyan'),
-            InlineKeyboardButton('🍁ʙᴏᴛ ɢʀᴏᴜᴘ🍁', url='https://t.me/Cinemalokham1')    
+            InlineKeyboardButton('➕ Add Me To Your Groups ➕', url=f'http://t.me/{temp.U_NAME}?startgroup=true')
             ],[
-            InlineKeyboardButton('🍿ᴊᴏɪɴ ᴏᴜʀ ᴍᴀɪɴ ᴄʜᴀɴɴᴇʟ🍿', url='https://t.me/LatestmoviedriveCL1')
+            InlineKeyboardButton('🔍 Search', switch_inline_query_current_chat=''),
+            InlineKeyboardButton('🤖 Updates', url='https://t.me/TeamEvamaria')
+            ],[
+            InlineKeyboardButton('ℹ️ Help', callback_data='help'),
+            InlineKeyboardButton('😊 About', callback_data='about')
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_text(
-            text=script.START_TXT.format(query.from_user.mention),
+            text=script.START_TXT.format(query.from_user.mention, temp.U_NAME, temp.B_NAME),
             reply_markup=reply_markup,
             parse_mode='html'
         )
     elif query.data == "help":
         buttons = [[
-            InlineKeyboardButton('Manuel Filter', callback_data='manuelfilter'),
+            InlineKeyboardButton('Manual Filter', callback_data='manuelfilter'),
             InlineKeyboardButton('Auto Filter', callback_data='autofilter')
             ],[
             InlineKeyboardButton('Connection', callback_data='coct'),
@@ -403,7 +431,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         )
     elif query.data == "about":
         buttons= [[
-            InlineKeyboardButton('🤖 Updates', url='https://t.me/EvaMariaUpdates'),
+            InlineKeyboardButton('🤖 Updates', url='https://t.me/TeamEvamaria'),
             InlineKeyboardButton('♥️ Source', callback_data='source')
             ],[
             InlineKeyboardButton('🏠 Home', callback_data='start'),
@@ -411,7 +439,7 @@ async def cb_handler(client: Client, query: CallbackQuery):
         ]]
         reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_text(
-            text=script.ABOUT_TXT,
+            text=script.ABOUT_TXT.format(temp.B_NAME),
             reply_markup=reply_markup,
             parse_mode='html'
         )
@@ -626,15 +654,11 @@ async def auto_filter(client, msg, spoll=False):
             logger.exception(e)
             await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))
     else:
-        await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))            
-        imdb=await get_poster(search)
-        if imdb and imdb.get('poster'):
-            await message.reply_photo(photo=imdb.get('poster'), caption=cap, reply_markup=InlineKeyboardMarkup(btn))
-        elif imdb:
-            await message.reply_photo(photo=NOR_IMG,  caption=cap, reply_markup=InlineKeyboardMarkup(btn))
-        else:
-            await message.reply_photo(photo=NOR_IMG, caption=f"🎪 ᴛɪᴛɪʟᴇ : {search}\n\n┏ 🤴 ᴀsᴋᴇᴅ ʙʏ : {message.from_user.mention}\n┣ ⚡️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : [ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰](https://t.me/Cinemalokham1)\n┗ 🍁 ᴄʜᴀɴɴᴇʟ : [ʟᴀᴛᴇsᴛ.ᴍᴏᴠɪᴇ.ᴅʀɪᴠᴇ](https://t.me/LatestmoviedriveCL1)\n\n\n★ᴘᴏᴡᴇʀᴇᴅ ʙʏ  [ᴄɪɴɪᴍᴀʜʟᴏᴋʜᴀᴍ](https://t.me/Cinemalokham1)", reply_markup=InlineKeyboardMarkup(btn))
+        await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))
+    if spoll:
+        await msg.message.delete()
         
+
 async def advantage_spell_chok(msg):
     query = re.sub(r"\b(pl(i|e)*?(s|z+|ease|se|ese|(e+)s(e)?)|((send|snd|giv(e)?|gib)(\sme)?)|movie(s)?|new|latest|br((o|u)h?)*|^h(e|a)?(l)*(o)*|mal(ayalam)?|t(h)?amil|file|that|find|und(o)*|kit(t(i|y)?)?o(w)?|thar(u)?(o)*w?|kittum(o)*|aya(k)*(um(o)*)?|full\smovie|any(one)|with\ssubtitle(s)?)", "", msg.text, flags=re.IGNORECASE) # plis contribute some common words 
     query = query.strip() + " movie"
