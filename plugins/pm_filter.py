@@ -31,7 +31,7 @@ STARTING_MSG = """
 """
 
 @Client.on_message(filters.group & filters.text & ~filters.edited & filters.incoming)
-async def give_filter(client,message):
+async def get_filter(client,message):
     k = await auto_filter(client, message)   
 
 @Client.on_callback_query(filters.regex(r"^next"))
