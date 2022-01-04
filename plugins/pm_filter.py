@@ -5,7 +5,7 @@ import ast
 from Script import script
 import pyrogram
 from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, make_inactive
-from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS
+from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, NOR_IMG
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
@@ -573,7 +573,7 @@ async def auto_filter(client, message):
         if imdb and imdb.get('poster'):
             await message.reply_photo(photo=imdb.get('poster'), caption=f"<b>⌕ ǫᴜᴇʀʏ: {search}</b> \n‌‌‌‌〓〓 ɪᴍᴅʙ ᴅᴇᴛᴀɪʟꜱ 〓〓:\n\n⍞ ᴛɪᴛɪʟᴇ: <a href={imdb['url']}>{imdb.get('title')}</a>\n⌗ ɢᴇɴʀᴇ: {imdb.get('genres')}\n⌬ ʏᴇᴀʀ: <a href={imdb['url']}/releaseinfo>{imdb.get('year')}</a>\n★  ʀᴀᴛɪɴɢ: <a href={imdb['url']}/ratings>{imdb.get('rating')}</a> / 10", reply_markup=InlineKeyboardMarkup(btn))
         elif imdb:
-            await message.reply_text(f"<b>⌕ ǫᴜᴇʀʏ: {search}</b> \n‌‌‌‌〓〓 ɪᴍᴅʙ ᴅᴇᴛᴀɪʟꜱ 〓〓:\n\n⍞ ᴛɪᴛɪʟᴇ: <a href={imdb['url']}>{imdb.get('title')}</a>\n⌗ ɢᴇɴʀᴇ: {imdb.get('genres')}\n⌬ ʏᴇᴀʀ: <a href={imdb['url']}/releaseinfo>{imdb.get('year')}</a>\n★  ʀᴀᴛɪɴɢ: <a href={imdb['url']}/ratings>{imdb.get('rating')}</a> / 10", reply_markup=InlineKeyboardMarkup(btn))
+            await message.reply_photo(photo=NOR_IMG, caption=f"<b>⌕ ǫᴜᴇʀʏ: {search}</b> \n‌‌‌‌〓〓 ɪᴍᴅʙ ᴅᴇᴛᴀɪʟꜱ 〓〓:\n\n⍞ ᴛɪᴛɪʟᴇ: <a href={imdb['url']}>{imdb.get('title')}</a>\n⌗ ɢᴇɴʀᴇ: {imdb.get('genres')}\n⌬ ʏᴇᴀʀ: <a href={imdb['url']}/releaseinfo>{imdb.get('year')}</a>\n★  ʀᴀᴛɪɴɢ: <a href={imdb['url']}/ratings>{imdb.get('rating')}</a> / 10", reply_markup=InlineKeyboardMarkup(btn))
         else:
-            await message.reply_text(f"<b>Here is What I Found In My Database For Your Query {search} ‌‌‌‌‎ </b>", reply_markup=InlineKeyboardMarkup(btn))
+            await message.reply_photo(photo=NOR_IMG, caption=f"🎪 ᴛɪᴛɪʟᴇ {search}\n\n┏ 🤴 ᴀsᴋᴇᴅ ʙʏ : {message.from_user.mention}\n┣ ⚡️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : \n┗ 🍁 ᴄʜᴀɴɴᴇʟ : [ʟᴀᴛᴇsᴛ.ᴍᴏᴠɪᴇ.ᴅʀɪᴠᴇ](https://t.me/LatestmoviedriveCL1)\n\n\n★ᴘᴏᴡᴇʀᴇᴅ ʙʏ  [ᴄɪɴɪᴍᴀʜʟᴏᴋʜᴀᴍ](https://t.me/Cinemalokham1)", reply_markup=InlineKeyboardMarkup(btn))
         
