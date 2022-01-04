@@ -625,7 +625,7 @@ async def auto_filter(client, msg, spoll=False):
         )
     imdb = await get_poster(search, file=(files[0]).file_name) if IMDB else None
     if imdb:
-        cap = IMDB_TEMPLATE.format(
+         cap = IMDB_TEMPLATE.format(
             query = search,
             title = imdb['title'],
             votes = imdb['votes'],
@@ -655,8 +655,8 @@ async def auto_filter(client, msg, spoll=False):
             rating = imdb['rating'],
             url = imdb['url'],
             **locals()
-        )
-    else:
+         )
+      else:
         cap = f"Here is what i found for your query {search}"
     if imdb and imdb.get('poster'):
         try:
