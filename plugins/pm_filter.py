@@ -29,10 +29,7 @@ STARTING_MSG = """
 
 ©️ ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰
 """
-
-@Client.on_message(filters.group & filters.text & ~filters.edited & filters.incoming)
-async def get_filter(client,message):
-    k = await auto_filter(client, message)   
+  
 
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
