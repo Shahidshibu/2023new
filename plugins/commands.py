@@ -90,9 +90,7 @@ async def start(client, message):
     await client.send_cached_media(
         chat_id=message.from_user.id,
         file_id=file_id,
-        caption=f_caption,
-        reply_markup=InlineKeyboardMarkup(bottuns)
-        )
+        caption=f_caption,       
         bottuns = [
             [
                 InlineKeyboardButton("🍁 ᴊᴏɪɴ ɢʀᴏᴜᴘ 🍁", url="https://t.me/Cinemalokham1"),
@@ -101,8 +99,9 @@ async def start(client, message):
             [
                 InlineKeyboardButton("🔖 ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜʙᴛɪᴛɪʟᴇ 🔖", url="https://t.me/subtitle_dl_bot")
             ]
-        ]                    
-
+        ],
+        reply_markup=InlineKeyboardMarkup(bottuns)
+    )
 @Client.on_message(filters.command('channel') & filters.user(ADMINS))
 async def channel_info(bot, message):
            
