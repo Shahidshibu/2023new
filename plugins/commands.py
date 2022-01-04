@@ -1,15 +1,16 @@
 import os
 import logging
 import random
+import asyncio
 from Script import script
 from pyrogram import Client, filters
 from pyrogram.errors.exceptions.bad_request_400 import ChatAdminRequired
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from database.ia_filterdb import Media, get_file_details
+from database.ia_filterdb import Media, get_file_details, unpack_new_file_id
 from database.users_chats_db import db
 from info import CHANNELS, ADMINS, AUTH_CHANNEL, CUSTOM_FILE_CAPTION, LOG_CHANNEL, PICS, JOIN_IMG
 from utils import get_size, is_subscribed, temp
-
+import re
 logger = logging.getLogger(__name__)
 
 @Client.on_message(filters.private & filters.command("start"))
@@ -75,15 +76,18 @@ async def start(client, message):
             await db.add_user(message.from_user.id, message.from_user.first_name)
         return
     file_id = message.command[1]
-    files = (await get_file_details(file_id))[0]
+    files_ = await get_file_details(file_id)
+    if not files_:
+        return await message.reply('No such file exist.')
+    files = files_[0]
     title = files.file_name
     size=get_size(files.file_size)
     f_caption=files.caption
     if CUSTOM_FILE_CAPTION:
         try:
-            f_caption=CUSTOM_FILE_CAPTION.format(file_name=title, file_size=size, file_caption=f_caption)
+            f_caption=CUSTOM_FILE_CAPTION.format(file_name= '' if title is None else title, file_size='' if size is None else size, file_caption='' if f_caption is None else f_caption)
         except Exception as e:
-            print(e)
+            logger.exception(e)
             f_caption=f_caption
     if f_caption is None:
         f_caption = f"{files.file_name}"
@@ -92,15 +96,15 @@ async def start(client, message):
         file_id=file_id,
         caption=f_caption,
         reply_markup=InlineKeyboardMarkup(
-             [
-                 [
-                     InlineKeyboardButton("🍁 ᴊᴏɪɴ ɢʀᴏᴜᴘ 🍁", url="https://t.me/Cinemalokham1"),
-                     InlineKeyboardButton("💥 ꜱʜᴀʀᴇ 💥", url="https://t.me/share/url?url=**%F0%9F%A4%A9%20%E0%B4%B8%E0%B4%BF%E0%B4%A8%E0%B4%BF%E0%B4%AE%20%E0%B4%B2%E0%B5%8B%E0%B4%95%E0%B4%82%20%F0%9F%A4%A9%0A%0A%E0%B4%8F%E0%B4%A4%E0%B5%8D%20%E0%B4%85%E0%B5%BC%E0%B4%A7%E0%B4%B0%E0%B4%BE%E0%B4%A4%E0%B5%8D%E0%B4%B0%E0%B4%BF%20%E0%B4%9A%E0%B5%8B%E0%B4%A6%E0%B4%BF%E0%B4%9A%E0%B5%8D%E0%B4%9A%E0%B4%BE%E0%B4%B2%E0%B5%81%E0%B4%82%20%E0%B4%AA%E0%B4%9F%E0%B4%82%20%E0%B4%95%E0%B4%BF%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B5%81%E0%B4%82,%20%E0%B4%B2%E0%B5%8B%E0%B4%95%E0%B4%A4%E0%B5%8D%E0%B4%A4%E0%B4%BF%E0%B4%B2%E0%B5%86%20%E0%B4%92%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B5%81%E0%B4%AE%E0%B4%BF%E0%B4%95%E0%B5%8D%E0%B4%95%20%E0%B4%AD%E0%B4%BE%E0%B4%B7%E0%B4%95%E0%B4%B3%E0%B4%BF%E0%B4%B2%E0%B5%81%E0%B4%AE%E0%B5%81%E0%B4%B3%E0%B5%8D%E0%B4%B3%20%E0%B4%B8%E0%B4%BF%E0%B4%A8%E0%B4%BF%E0%B4%AE%E0%B4%95%E0%B4%B3%E0%B5%81%E0%B4%9F%E0%B5%86%20%E0%B4%95%E0%B4%B3%E0%B4%95%E0%B5%8D%E0%B4%B7%E0%B5%BB..%20%E2%9D%A4%EF%B8%8F%0A%0A%F0%9F%91%87%20GROUP%20LINK%20%F0%9F%91%87%0A@Cinemalokham1%0A@Cinemalokham1%0A@Cinemalokham1**")
-                 ],
-                 [
-                     InlineKeyboardButton("🔖 ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜʙᴛɪᴛɪʟᴇ 🔖", url="https://t.me/subtitle_dl_bot")
-                 ]
-             ]
+            [
+                [
+                    InlineKeyboardButton("🍁 ᴊᴏɪɴ ɢʀᴏᴜᴘ 🍁", url="https://t.me/Cinemalokham1"),
+                    InlineKeyboardButton("💥 ꜱʜᴀʀᴇ 💥", url="https://t.me/share/url?url=**%F0%9F%A4%A9%20%E0%B4%B8%E0%B4%BF%E0%B4%A8%E0%B4%BF%E0%B4%AE%20%E0%B4%B2%E0%B5%8B%E0%B4%95%E0%B4%82%20%F0%9F%A4%A9%0A%0A%E0%B4%8F%E0%B4%A4%E0%B5%8D%20%E0%B4%85%E0%B5%BC%E0%B4%A7%E0%B4%B0%E0%B4%BE%E0%B4%A4%E0%B5%8D%E0%B4%B0%E0%B4%BF%20%E0%B4%9A%E0%B5%8B%E0%B4%A6%E0%B4%BF%E0%B4%9A%E0%B5%8D%E0%B4%9A%E0%B4%BE%E0%B4%B2%E0%B5%81%E0%B4%82%20%E0%B4%AA%E0%B4%9F%E0%B4%82%20%E0%B4%95%E0%B4%BF%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B5%81%E0%B4%82,%20%E0%B4%B2%E0%B5%8B%E0%B4%95%E0%B4%A4%E0%B5%8D%E0%B4%A4%E0%B4%BF%E0%B4%B2%E0%B5%86%20%E0%B4%92%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B5%81%E0%B4%AE%E0%B4%BF%E0%B4%95%E0%B5%8D%E0%B4%95%20%E0%B4%AD%E0%B4%BE%E0%B4%B7%E0%B4%95%E0%B4%B3%E0%B4%BF%E0%B4%B2%E0%B5%81%E0%B4%AE%E0%B5%81%E0%B4%B3%E0%B5%8D%E0%B4%B3%20%E0%B4%B8%E0%B4%BF%E0%B4%A8%E0%B4%BF%E0%B4%AE%E0%B4%95%E0%B4%B3%E0%B5%81%E0%B4%9F%E0%B5%86%20%E0%B4%95%E0%B4%B3%E0%B4%95%E0%B5%8D%E0%B4%B7%E0%B5%BB..%20%E2%9D%A4%EF%B8%8F%0A%0A%F0%9F%91%87%20GROUP%20LINK%20%F0%9F%91%87%0A@Cinemalokham1%0A@Cinemalokham1%0A@Cinemalokham1**")
+                ],
+                [
+                    InlineKeyboardButton("🔖 ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜʙᴛɪᴛɪʟᴇ 🔖", url="https://t.me/subtitle_dl_bot")
+                ]
+            ]
         ),
         parse_mode="markdown"
     )
@@ -161,16 +165,35 @@ async def delete(bot, message):
     else:
         await msg.edit('This is not supported file format')
         return
+    
+    file_id, file_ref = unpack_new_file_id(media.file_id)
 
     result = await Media.collection.delete_one({
-        'file_name': media.file_name,
-        'file_size': media.file_size,
-        'mime_type': media.mime_type
+        '_id': file_id,
     })
     if result.deleted_count:
         await msg.edit('File is successfully deleted from database')
     else:
-        await msg.edit('File not found in database')
+        file_name = re.sub(r"(_|\-|\.|\+)", " ", str(media.file_name))
+        result = await Media.collection.delete_one({
+            'file_name': file_name,
+            'file_size': media.file_size,
+            'mime_type': media.mime_type
+            })
+        if result.deleted_count:
+            await msg.edit('File is successfully deleted from database')
+        else:
+            # files indexed before https://github.com/EvamariaTG/EvaMaria/commit/f3d2a1bcb155faf44178e5d7a685a1b533e714bf#diff-86b613edf1748372103e94cacff3b578b36b698ef9c16817bb98fe9ef22fb669R39 
+            # have original file name.
+            result = await Media.collection.delete_one({
+                'file_name': media.file_name,
+                'file_size': media.file_size,
+                'mime_type': media.mime_type
+            })
+            if result.deleted_count:
+                await msg.edit('File is successfully deleted from database')
+            else:
+                await msg.edit('File not found in database')
 
 
 @Client.on_message(filters.command('deleteall') & filters.user(ADMINS))
