@@ -20,13 +20,7 @@ from database.filters_mdb import(
 
 BUTTONS = {}
 
-HEHE_TXT = """
-മോനെ {} ഇത് നിനക്കുള്ളതല്ല 😉
-{}ന്റെ റിക്യൂസ്റ്റ് ആണ് ഇത് 😜
-ʀᴇǫᴜᴇᴇsᴛ ʏᴏᴜʀ ᴏᴡɴ 𝕙
 
-©️ ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰
-"""
 
 @Client.on_message(filters.group & filters.text & filters.incoming)
 async def give_filter(client,message):
@@ -76,6 +70,14 @@ async def give_filter(client,message):
 @Client.on_callback_query(filters.regex(r"^next"))
 async def next_page(bot, query):
 
+HEHE_TXT = """
+മോനെ {} ഇത് നിനക്കുള്ളതല്ല 😉
+{}ന്റെ റിക്യൂസ്റ്റ് ആണ് ഇത് 😜
+ʀᴇǫᴜᴇᴇsᴛ ʏᴏᴜʀ ᴏᴡɴ 𝕙
+
+©️ ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰
+"""   
+   
     ident, req, key, offset = query.data.split("_")
     if int(req) not in [query.from_user.id, 0]:
         return await query.answer(text=HEHE_TXT.format(query.from_user.first_name), show_alert=True)
