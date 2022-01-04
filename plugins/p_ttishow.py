@@ -127,7 +127,6 @@ async def re_enable_chat(bot, message):
     sts = await db.get_chat(int(chat))
     if not sts:
         return await message.reply("Chat Not Found In DB !")
-    print(sts)
     if not sts.get('is_disabled'):
         return await message.reply('This chat is not yet disabled.')
     await db.re_enable_chat(int(chat_))
@@ -241,7 +240,10 @@ async def list_users(bot, message):
     users = await db.get_all_users()
     out = "Users Saved In DB Are:\n\n"
     async for user in users:
-        out += f"<a href=tg://user?id={user['id']}>{user['name']}</a>\n"
+        out += f"<a href=tg://user?id={user['id']}>{user['name']}</a>"
+        if user['ban_status']['is_banned']:
+            out += '( Banned User )'
+        out += '\n'
     try:
         await raju.edit_text(out)
     except MessageTooLong:
@@ -255,7 +257,10 @@ async def list_chats(bot, message):
     chats = await db.get_all_chats()
     out = "Chats Saved In DB Are:\n\n"
     async for chat in chats:
-        out += f"**Title:** `{chat['title']}`\n**- ID:** `{chat['id']}`\n"
+        out += f"**Title:** `{chat['title']}`\n**- ID:** `{chat['id']}`"
+        if chat['chat_status']['is_disabled']:
+            out += '( Disabled Chat )'
+        out += '\n'
     try:
         await raju.edit_text(out)
     except MessageTooLong:
