@@ -80,7 +80,7 @@ HEHE_TXT = """
    
     ident, req, key, offset = query.data.split("_")
     if int(req) not in [query.from_user.id, 0]:
-        return await query.answer(text=HEHE_TXT.format(query.from_user.first_name), show_alert=True)
+        return await query.answer(text=മോനെ {query.from_user.first_name} ഇത് നിനക്കുള്ളതല്ല 😉\n{}ന്റെ റിക്യൂസ്റ്റ് ആണ് ഇത് 😜\nʀᴇǫᴜᴇᴇsᴛ ʏᴏᴜʀ ᴏᴡɴ 𝕙\n\n©️ ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰, show_alert=True)
     try:
         offset = int(offset)
     except:
