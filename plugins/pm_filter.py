@@ -5,7 +5,7 @@ import ast
 from Script import script
 import pyrogram
 from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, make_inactive
-from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, NOR_IMG
+from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, NOR_IMG, SINGLE_BUTTON, IMDB_TEMPLATE, P_TTI_SHOW_OFF, IMDB
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
@@ -569,11 +569,58 @@ async def auto_filter(client, message):
             btn.append(
                 [InlineKeyboardButton(text="🗓 1/1",callback_data="pages")]
             )
+    imdb = await get_poster(search, file=(files[0]).file_name) if IMDB else None
+    if imdb:
+        cap = IMDB_TEMPLATE.format(
+            query = search,
+            title = imdb['title'],
+            votes = imdb['votes'],
+            aka = imdb["aka"],
+            seasons = imdb["seasons"],
+            box_office = imdb['box_office'],
+            localized_title = imdb['localized_title'],
+            kind = imdb['kind'],
+            imdb_id = imdb["imdb_id"],
+            cast = imdb["cast"],
+            runtime = imdb["runtime"],
+            countries = imdb["countries"],
+            certificates = imdb["certificates"],
+            languages = imdb["languages"],
+            director = imdb["director"],
+            writer = imdb["writer"],
+            producer = imdb["producer"],
+            composer = imdb["composer"],
+            cinematographer = imdb["cinematographer"],
+            music_team = imdb["music_team"],
+            distributors = imdb["distributors"],
+            release_date = imdb['release_date'],
+            year = imdb['year'],
+            genres = imdb['genres'],
+            poster = imdb['poster'],
+            plot = imdb['plot'],
+            rating = imdb['rating'],
+            url = imdb['url'],
+            **locals()
+        )
+    else:
+        cap = f"Here is what i found for your query {search}"
+    if imdb and imdb.get('poster'):
+        try:
+            await message.reply_photo(photo=imdb.get('poster'), caption=cap, reply_markup=InlineKeyboardMarkup(btn))
+        except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+            pic = imdb.get('poster')
+            poster = pic.replace('.jpg', "._V1_UX360.jpg")
+            await message.reply_photo(photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(btn))
+        except Exception as e:
+            logger.exception(e)
+            await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))
+    else:
+        await message.reply_text(cap, reply_markup=InlineKeyboardMarkup(btn))            
         imdb=await get_poster(search)
         if imdb and imdb.get('poster'):
-            await message.reply_photo(photo=imdb.get('poster'), caption=f"<b>⌕ ǫᴜᴇʀʏ: {search}</b> \n‌‌‌‌\n〓〓 ɪᴍᴅʙ ᴅᴇᴛᴀɪʟꜱ 〓〓:\n\n⍞ ᴛɪᴛɪʟᴇ: <a href={imdb['url']}>{imdb.get('title')}</a>\n⌗ ɢᴇɴʀᴇ: {genres}\n★  ʀᴀᴛɪɴɢ: {rating} / 10\n⌥ ʀᴜɴᴛɪᴍᴇ : {runtime} Min\n⌬ ʟᴀɴɢᴜᴀɢᴇs : <code>{languages}</code>\n〄 ʀᴇʟᴇᴀꜱᴇ ᴅᴀᴛᴇ : {release_date}\n\n★ ᴘᴏᴡᴇʀᴇᴅ ʙʏ <a href="https://t.me/Cinemalokham1">ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ</a>", reply_markup=InlineKeyboardMarkup(btn))
+            await message.reply_photo(photo=imdb.get('poster'), caption=cap, reply_markup=InlineKeyboardMarkup(btn))
         elif imdb:
-            await message.reply_photo(photo=NOR_IMG, caption=f"<b>⌕ ǫᴜᴇʀʏ: {search}</b> \n‌‌‌‌\n〓〓 ɪᴍᴅʙ ᴅᴇᴛᴀɪʟꜱ 〓〓:\n\n⍞ ᴛɪᴛɪʟᴇ: <a href={imdb['url']}>{imdb.get('title')}</a>\n⌗ ɢᴇɴʀᴇ: {genres}\n★  ʀᴀᴛɪɴɢ: {rating} / 10\n⌥ ʀᴜɴᴛɪᴍᴇ : {runtime} Min\n⌬ ʟᴀɴɢᴜᴀɢᴇs : <code>{languages}</code>\n〄 ʀᴇʟᴇᴀꜱᴇ ᴅᴀᴛᴇ : {release_date}\n\n★ ᴘᴏᴡᴇʀᴇᴅ ʙʏ <a href="https://t.me/Cinemalokham1">ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ</a>", reply_markup=InlineKeyboardMarkup(btn))
+            await message.reply_photo(photo=NOR_IMG,  caption=cap, reply_markup=InlineKeyboardMarkup(btn))
         else:
             await message.reply_photo(photo=NOR_IMG, caption=f"🎪 ᴛɪᴛɪʟᴇ : {search}\n\n┏ 🤴 ᴀsᴋᴇᴅ ʙʏ : {message.from_user.mention}\n┣ ⚡️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : [ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰](https://t.me/Cinemalokham1)\n┗ 🍁 ᴄʜᴀɴɴᴇʟ : [ʟᴀᴛᴇsᴛ.ᴍᴏᴠɪᴇ.ᴅʀɪᴠᴇ](https://t.me/LatestmoviedriveCL1)\n\n\n★ᴘᴏᴡᴇʀᴇᴅ ʙʏ  [ᴄɪɴɪᴍᴀʜʟᴏᴋʜᴀᴍ](https://t.me/Cinemalokham1)", reply_markup=InlineKeyboardMarkup(btn))
         
