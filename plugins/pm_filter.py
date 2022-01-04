@@ -652,8 +652,7 @@ async def auto_filter(client, msg, spoll=False):
             genres = imdb['genres'],
             poster = imdb['poster'],
             plot = imdb['plot'],
-            rating = imdb['rating'],
-            url = imdb['url'],
+            rating = imdb['rating']
             **locals()
          )
      else:
@@ -670,8 +669,6 @@ async def auto_filter(client, msg, spoll=False):
             await message.reply_photo(photo=NOR_IMG, caption=cap, reply_markup=InlineKeyboardMarkup(btn))
     else:
         await message.reply_photo(photo=NOR_IMG, caption=f"🎪 ᴛɪᴛɪʟᴇ : {search}\n\n┏ 🤴 ᴀsᴋᴇᴅ ʙʏ : {message.from_user.mention}\n┣ ⚡️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : [ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰](https://t.me/Cinemalokham1)\n┗ 🍁 ᴄʜᴀɴɴᴇʟ : [ʟᴀᴛᴇsᴛ.ᴍᴏᴠɪᴇ.ᴅʀɪᴠᴇ](https://t.me/LatestmoviedriveCL1)\n\n\n★ᴘᴏᴡᴇʀᴇᴅ ʙʏ  [ᴄɪɴɪᴍᴀʜʟᴏᴋʜᴀᴍ](https://t.me/Cinemalokham1)", reply_markup=InlineKeyboardMarkup(btn))
-    if spoll:
-        await msg.message.delete()
         
 
 async def advantage_spell_chok(msg):
