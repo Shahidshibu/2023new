@@ -656,20 +656,20 @@ async def auto_filter(client, msg, spoll=False):
             url = imdb['url'],
             **locals()
          )
-         else:
-            cap = f"Here is what i found for your query {search}"
-            if imdb and imdb.get('poster'):
-               try:
-                  await message.reply_photo(photo=imdb.get('poster'), caption=cap, reply_markup=InlineKeyboardMarkup(btn)
-                                            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
-                                            pic = imdb.get('poster')
-                                            poster = pic.replace('.jpg', "._V1_UX360.jpg")
-                  await message.reply_photo(photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(btn))
-                                            except Exception as e:
-                                            logger.exception(e)
+     else:
+      cap = f"Here is what i found for your query {search}"
+      if imdb and imdb.get('poster'):
+         try:
+            await message.reply_photo(photo=imdb.get('poster'), caption=cap, reply_markup=InlineKeyboardMarkup(btn))
+            except (MediaEmpty, PhotoInvalidDimensions, WebpageMediaEmpty):
+               pic = imdb.get('poster')
+               poster = pic.replace('.jpg', "._V1_UX360.jpg")
+               await message.reply_photo(photo=poster, caption=cap, reply_markup=InlineKeyboardMarkup(btn))
+               except Exception as e:
+                  logger.exception(e)
                   await message.reply_photo(photo=NOR_IMG, caption=cap, reply_markup=InlineKeyboardMarkup(btn))
-         else:
-                  await message.reply_photo(photo=NOR_IMG, caption=f"🎪 ᴛɪᴛɪʟᴇ : {search}\n\n┏ 🤴 ᴀsᴋᴇᴅ ʙʏ : {message.from_user.mention}\n┣ ⚡️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : [ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰](https://t.me/Cinemalokham1)\n┗ 🍁 ᴄʜᴀɴɴᴇʟ : [ʟᴀᴛᴇsᴛ.ᴍᴏᴠɪᴇ.ᴅʀɪᴠᴇ](https://t.me/LatestmoviedriveCL1)\n\n\n★ᴘᴏᴡᴇʀᴇᴅ ʙʏ  [ᴄɪɴɪᴍᴀʜʟᴏᴋʜᴀᴍ](https://t.me/Cinemalokham1)", reply_markup=InlineKeyboardMarkup(btn))
+                  else:
+                     await message.reply_photo(photo=NOR_IMG, caption=f"🎪 ᴛɪᴛɪʟᴇ : {search}\n\n┏ 🤴 ᴀsᴋᴇᴅ ʙʏ : {message.from_user.mention}\n┣ ⚡️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : [ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰](https://t.me/Cinemalokham1)\n┗ 🍁 ᴄʜᴀɴɴᴇʟ : [ʟᴀᴛᴇsᴛ.ᴍᴏᴠɪᴇ.ᴅʀɪᴠᴇ](https://t.me/LatestmoviedriveCL1)\n\n\n★ᴘᴏᴡᴇʀᴇᴅ ʙʏ  [ᴄɪɴɪᴍᴀʜʟᴏᴋʜᴀᴍ](https://t.me/Cinemalokham1)", reply_markup=InlineKeyboardMarkup(btn))
     
 
 async def manual_filters(client, message, text=False):
