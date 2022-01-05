@@ -26,7 +26,7 @@ logger.setLevel(logging.ERROR)
 BUTTONS = {}
 SPELL_CHECK = {}
 
-NOR_TXT= """🎪 ᴛɪᴛɪʟᴇ : <code>search</code>
+NOR_TXT= """🎪 ᴛɪᴛɪʟᴇ : <code>{search}</code>
 
 ┏ 🤴 ᴀsᴋᴇᴅ ʙʏ : {},
 ┣ ⚡️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : [ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰](https://t.me/Cinemalokham1)
