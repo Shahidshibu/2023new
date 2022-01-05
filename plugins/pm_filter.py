@@ -7,7 +7,7 @@ from pyrogram.errors.exceptions.bad_request_400 import MediaEmpty, PhotoInvalidD
 from Script import script
 import pyrogram
 from database.connections_mdb import active_connection, all_connections, delete_connection, if_active, make_active, make_inactive
-from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE, NORIMGE
+from info import ADMINS, AUTH_CHANNEL, AUTH_USERS, CUSTOM_FILE_CAPTION, AUTH_GROUPS, P_TTI_SHOW_OFF, IMDB, SINGLE_BUTTON, SPELL_CHECK_REPLY, IMDB_TEMPLATE, NORIMGE, NOR_TXT
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, UserIsBlocked, MessageNotModified, PeerIdInvalid
@@ -26,14 +26,6 @@ logger.setLevel(logging.ERROR)
 BUTTONS = {}
 SPELL_CHECK = {}
 
-NOR_TXT= """🎪 ᴛɪᴛɪʟᴇ : <code>{search}</code>
-
-┏ 🤴 ᴀsᴋᴇᴅ ʙʏ : {},
-┣ ⚡️ ᴘᴏᴡᴇʀᴇᴅ ʙʏ : [ᴄɪɴᴇᴍᴀ ʟᴏᴋʜᴀᴍ ²ᐧ⁰](https://t.me/Cinemalokham1)
-┗ 🍁 ᴄʜᴀɴɴᴇʟ : [ʟᴀᴛᴇsᴛ.ᴍᴏᴠɪᴇ.ᴅʀɪᴠᴇ](https://t.me/LatestmoviedriveCL1)
-
-
-★ᴘᴏᴡᴇʀᴇᴅ ʙʏ  [ᴄɪɴɪᴍᴀʜʟᴏᴋʜᴀᴍ](https://t.me/Cinemalokham1)"""
 
 @Client.on_message(filters.group & filters.text & ~filters.edited & filters.incoming)
 async def give_filter(client,message):
