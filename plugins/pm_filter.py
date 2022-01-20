@@ -712,6 +712,16 @@ async def cb_handler(client: Client, query: CallbackQuery):
             reply_markup=reply_markup,
             parse_mode='html'
         )
+         elif query.data == "mandanml":
+            buttons = [[
+               InlineKeyboardButton('🇺🇸 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴇɴɢʟɪꜱʜ 🇺🇸', callback_data='mandan')
+            ]]
+            reply_markup = InlineKeyboardMarkup(buttons)
+            await query.message.edit_text(
+               text=script.MANDANML_TXT,
+               reply_markup=reply_markup,
+               parse_mode='html'
+            )         
       
 async def manual_filters(client, message, text=False):
     group_id = message.chat.id
