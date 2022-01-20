@@ -706,19 +706,21 @@ async def cb_handler(client: Client, query: CallbackQuery):
          btn = [[
             InlineKeyboardButton('🇮🇳 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴍᴀʟᴀʏᴀʟᴀᴍ 🇮🇳', callback_data='mandanml')
         ]]
+        reply_markup = InlineKeyboardMarkup(btn)
         await query.message.edit_text(
             text=script.MANDANENG_TXT,
+            reply_markup=reply_markup,
             parse_mode='html',
-            reply_markup=InlineKeyboardMarkup(btn)
         )
          elif query.data == "mandanml":
             btn = [[
                InlineKeyboardButton('🇺🇸 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴇɴɢʟɪꜱʜ 🇺🇸', callback_data='mandan')
             ]]
+            reply_markup = InlineKeyboardMarkup(btn)
             await query.message.edit_text(
                text=script.MANDANML_TXT,
+               reply_markup=reply_markup,
                parse_mode='html',
-               reply_markup=InlineKeyboardMarkup(btn)
             )         
       
 async def manual_filters(client, message, text=False):
