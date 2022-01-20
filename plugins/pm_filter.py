@@ -696,15 +696,23 @@ async def advantage_spell_chok(msg):
         return
     SPELL_CHECK[msg.message_id] = movielist
     btn = [[
-                InlineKeyboardButton(
-                    text=movie.strip(),
-                    callback_data=f"spolling#{user}#{k}",
-                )
-            ] for k, movie in enumerate(movielist)]
-    btn.append([InlineKeyboardButton(text="Close", callback_data=f'spolling#{user}#close_spellcheck')])
-    await msg.reply("I couldn't find anything related to that\nDid you mean any one of these?", reply_markup=InlineKeyboardMarkup(btn))
-    
+                InlineKeyboardButton('🇺🇸 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴇɴɢʟɪꜱʜ 🇺🇸', callback_data='mandan')
+    ]]
+    await msg.reply(f"ഹലോ {message.from_user.first_name} നിങ്ങൾ ആവശ്യപ്പെട്ട ഈ സിനിമ എനിക്ക് കണ്ടെത്താൻ കഴിഞ്ഞില്ല 🥴 ...\n\nɢᴏᴏɢʟᴇ,ɪᴍᴅʙ ഏതെങ്കിലും ഒരു ബട്ടണിൽ ക്ലിക്ക് ചെയ്ത് ശരിയായ സിനിമയുടെ പേര് കണ്ടെത്തി ഇവിടെ നൽകുക എന്നാലേ സിനിമ / സീരിയസ് കിട്ടുകയുള്ളു 🙂...\n\nശരിയായ പേര് നൽകിയിട്ടും നിങ്ങൾക്ക് സിനിമ ലഭിക്കുന്നില്ലെങ്കിൽ ... @admins type movie name  ഈ ഫോർമാറ്റിൽ അഡ്മിനെ അറിയിക്കുക .. ഞങ്ങൾ 24 മണിക്കൂറിനുള്ളിൽ അപ്‌ലോഡ് ചെയ്യും 😇", reply_markup=InlineKeyboardMarkup(btn))
 
+@Client.on_callback_query()
+async def cb_handler(client: Client, query: CallbackQuery):
+    if query.data == "mandan":
+         buttons = [[
+            InlineKeyboardButton('🇮🇳 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴍᴀʟᴀʏᴀʟᴀᴍ 🇮🇳', callback_data='mandanml')
+        ]]
+        reply_markup = InlineKeyboardMarkup(buttons)
+        await query.message.edit_text(
+            text=script.MANDANENG_TXT,
+            reply_markup=reply_markup,
+            parse_mode='html'
+        )
+      
 async def manual_filters(client, message, text=False):
     group_id = message.chat.id
     name = text or message.text
