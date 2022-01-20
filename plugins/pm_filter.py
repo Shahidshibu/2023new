@@ -703,25 +703,7 @@ async def advantage_spell_chok(msg):
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "mandan":
-         btn = [[
-            InlineKeyboardButton('🇮🇳 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴍᴀʟᴀʏᴀʟᴀᴍ 🇮🇳', callback_data='mandanml')
-        ]]
-        reply_markup = InlineKeyboardMarkup(btn)
-        await query.message.edit_text(
-            text=script.MANDANENG_TXT,
-            reply_markup=reply_markup,
-            parse_mode='html',
-        )
-         elif query.data == "mandanml":
-            btn = [[
-               InlineKeyboardButton('🇺🇸 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴇɴɢʟɪꜱʜ 🇺🇸', callback_data='mandan')
-            ]]
-            reply_markup = InlineKeyboardMarkup(btn)
-            await query.message.edit_text(
-               text=script.MANDANML_TXT,
-               reply_markup=reply_markup,
-               parse_mode='html',
-            )         
+        await query.answer(text=f"Helo {query.from_user.first_name} I could not find the movie you asked for 🥴\n\nGoogle, IMDb Click on any button and find the CORRECT MOVIE NAME and enter it here but the movie will be available 🙃\n\nIf you do not receive the movie even after entering the correct name ...  @admin type movie name Inform the admin in this format .. We will upload within 24 hours 😇",show_alert=True)    
       
 async def manual_filters(client, message, text=False):
     group_id = message.chat.id
