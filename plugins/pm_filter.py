@@ -703,7 +703,7 @@ async def advantage_spell_chok(msg):
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "mandan":
-        await query.answer(text=f"Helo {query.from_user.first_name} I could not find the movie you asked for 🥴\nGoogle, IMDb Click on any button and find the CORRECT MOVIE NAME and enter it here but the movie will be available 🙃\nIf you do not receive the movie even after entering the correct name-@admin type movie name Inform the admin in this format,We will upload within 24 hours 😇",show_alert=True)    
+        await query.answer(text=f"Helo {query.from_user.first_name} I could not find the movie you asked for 🥴\nGoogle, IMDb Click on any button and find the CORRECT MOVIE NAME and enter it here but the movie will be available 🙃\nIf you do not receive the movie even after entering the correct name-@admin type movie name Inform the admin in this format😇",show_alert=True)    
       
 async def manual_filters(client, message, text=False):
     group_id = message.chat.id
