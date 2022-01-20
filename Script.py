@@ -105,3 +105,9 @@ Added By - {}
 ID - <code>{}</code>
 Name - {}
 """
+
+    MANDANENG_TXT = f"""<b>Helo {message.from_user.first_name} I could not find the movie you asked for 🥴
+
+Google, IMDb Click on any button and find the CORRECT MOVIE NAME and enter it here but the movie will be available 🙃
+
+If you do not receive the movie even after entering the correct name ...  @admin type movie name Inform the admin in this format .. We will upload within 24 hours 😇</b>"""    
