@@ -703,24 +703,22 @@ async def advantage_spell_chok(msg):
 @Client.on_callback_query()
 async def cb_handler(client: Client, query: CallbackQuery):
     if query.data == "mandan":
-         buttons = [[
+         btn = [[
             InlineKeyboardButton('🇮🇳 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴍᴀʟᴀʏᴀʟᴀᴍ 🇮🇳', callback_data='mandanml')
         ]]
-        reply_markup = InlineKeyboardMarkup(buttons)
         await query.message.edit_text(
             text=script.MANDANENG_TXT,
-            reply_markup=reply_markup,
-            parse_mode='html'
+            parse_mode='html',
+            reply_markup=InlineKeyboardMarkup(btn)
         )
          elif query.data == "mandanml":
-            buttons = [[
+            btn = [[
                InlineKeyboardButton('🇺🇸 ᴛʀᴀɴꜱʟᴀᴛᴇ ᴛᴏ ᴇɴɢʟɪꜱʜ 🇺🇸', callback_data='mandan')
             ]]
-            reply_markup = InlineKeyboardMarkup(buttons)
             await query.message.edit_text(
                text=script.MANDANML_TXT,
-               reply_markup=reply_markup,
-               parse_mode='html'
+               parse_mode='html',
+               reply_markup=InlineKeyboardMarkup(btn)
             )         
       
 async def manual_filters(client, message, text=False):
