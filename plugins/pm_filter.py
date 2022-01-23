@@ -637,25 +637,11 @@ async def auto_filter(client, msg, spoll=False):
         btn = [
             [
                 InlineKeyboardButton(
-                    text="ɪɴꜰᴏ",
-                    callback_data='infoaada',
-                ),
-                InlineKeyboardButton(
-                    text="ᴍᴏᴠɪᴇ",
-                    callback_data='movieaada',
-                ),
-                InlineKeyboardButton(
-                    text="ꜱᴇʀɪᴇꜱ",
-                    callback_data='seriesaada',
-                ),
-            ],
-            [
-                InlineKeyboardButton(
                     text=f"◽ {get_size(file.file_size)} ▸ {file.file_name}",
                     callback_data=f'{pre}#{file.file_id}',
                 ),
             ]
-                for file in file
+            for file in file
         ]
         else:
             btn = [
